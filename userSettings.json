@@ -1,0 +1,29 @@
+{
+    "Engine Settings": {
+        "Draw Grid": false,
+        "Vsync": false,
+        "Enable FPS Limit": false,
+        "FPS Limit": 0.0
+    },
+    "Game Settings": {
+        "Vsync": false,
+        "Enable FPS Limit": false,
+        "FPS Limit": 0.0
+    },
+    "Camera Settings": {
+        "Position": [
+            96.84349060058594,
+            19.203454971313478,
+            1.1329983472824097
+        ],
+        "Rotation": [
+            0.3160305917263031,
+            -0.5307598114013672,
+            0.22162219882011414,
+            0.7545212507247925
+        ]
+    },
+    "Scene Settings": {
+        "Name": "Level1Scene"
+    }
+}

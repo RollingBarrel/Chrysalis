@@ -1,0 +1,40 @@
+#version 460 core
+
+layout(std430, binding = 15) readonly buffer Palette {mat4 palette[];};
+layout(location = 25) uniform int numVertices;
+struct InVertex
+{
+    vec4 pos; // w == uv.x
+    vec4 norm; // x == uv.y
+    vec4 tang;
+    uvec4 joints;
+    vec4 weights;
+};
+layout(std430, binding = 20) readonly buffer AnimVertices {InVertex animVertices[];};
+struct OutVertex
+{
+    vec4 pos; // w == uv.x
+    vec4 norm; // x == uv.y
+    vec4 tang;
+};
+layout(std430, binding = 21) writeonly buffer Vertices {OutVertex outVertices[];};
+layout(location = 0) uniform uint skinOffset;
+
+
+layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+void main()
+{
+	uint index = gl_GlobalInvocationID.x;
+    if(index < numVertices) 
+    {
+       InVertex vertex = animVertices[skinOffset + index];
+
+       mat4 skinTransform = palette[vertex.joints[0]]*vertex.weights[0] + palette[vertex.joints[1]]*vertex.weights[1] +
+        palette[vertex.joints[2]]*vertex.weights[2] + palette[vertex.joints[3]]*vertex.weights[3];
+
+       outVertices[index].pos.xyz = (skinTransform*vec4(vertex.pos.xyz,1.0)).xyz;
+       outVertices[index].norm.yzw = (skinTransform*vec4(vertex.norm.yzw,0.0)).xyz;
+       outVertices[index].tang.xyz = (skinTransform*vec4(vertex.tang.xyz,0.0)).xyz;
+       outVertices[index].tang.w = vertex.tang.w;
+    }
+}
