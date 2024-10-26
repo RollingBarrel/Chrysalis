@@ -3,6 +3,7 @@
 
 #include "float3.h"
 #include "float2.h"
+#include "TimerScript.h"
 
 class MoveState : public State
 {
@@ -24,11 +25,14 @@ private:
 
 	float2 SetMovingDirection();
 
+	float ComputeMoveAnge(float3 mouseDir);
+	std::string GetTriggerFromAngle(float angle);
+
 	float3 mCameraFront;
 	float3 mMoveDirection;
 
-	float mStepTimer = 0.0f;
-	float mStepCooldown = 0.5f;
+	TimerScript mStepTimer;
+	float mStepCooldown = 0.3f;
 
 	float mDashTimer = 0.0f;
 };

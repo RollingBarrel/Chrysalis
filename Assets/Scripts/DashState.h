@@ -6,6 +6,7 @@ class TrailComponent;
 class ColorGradient;
 class GameObject;
 class ParticleSystemComponent;
+class DashVFX;
 
 class DashState : public State
 {
@@ -19,6 +20,8 @@ public:
 	void Enter() override;
 	void Exit() override;
 
+	bool IsReady() override;
+
 	StateType GetType() override;
 
 private:
@@ -26,11 +29,7 @@ private:
 	float mDashTimer = 0.0f;
 	float mDashDuration = 0.5f;
 
-	TrailComponent* mDashTrail = nullptr;
-
-	ParticleSystemComponent* mDashParticles = nullptr;		//Active during the whole dash
-	ParticleSystemComponent* mBegginingParticles = nullptr;	//Only active at the beggining of the dash (for responsiveness)
-	ParticleSystemComponent* mEndingParticles = nullptr;	//Only active at the end of the dash
-
 	GameObject* mDashVFX;
+	GameObject* mCharacterMesh;
+	GameObject* mPistolMesh;
 };

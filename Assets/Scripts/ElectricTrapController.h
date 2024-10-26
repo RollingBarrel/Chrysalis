@@ -3,6 +3,8 @@
 #include <vector>
 #include "Macros.h"
 #include "TimerScript.h"
+#include "PlayerController.h"
+#include "AudioManager.h"
 
 struct CollisionData;
 class BoxColliderComponent;
@@ -12,33 +14,47 @@ GENERATE_BODY(ElectricTrapController);
 class ElectricTrapController :
     public Script
 {
-	FRIEND(ElectricTrapController)
+    FRIEND(ElectricTrapController)
 public:
-	ElectricTrapController(GameObject* owner);
-	~ElectricTrapController();
-	void Update() override;
-	void Start () override;
-	void OnCollisionEnter(CollisionData* collisionData);
+    ElectricTrapController(GameObject* owner);
+    ~ElectricTrapController();
+    void Update() override;
+    void Start() override;
+    void OnCollisionEnter(CollisionData* collisionData);
+
+    void SetAwake(bool awake) { mIsAwake = awake; }
+    void SetTrapSound(SFX sound) { mTrapSound = sound; }
 
 private:
-	bool IsInTrap(const GameObject* target);
-	void ActiveTrap(bool active);
 
-	BoxColliderComponent* mCollider = nullptr;
-	std::vector<GameObject*> mInTrap;
+    void ActivateTrap(bool active, bool vfxOnly);
 
-	float mArea = 1.0f; 
-	GameObject* mSfx = nullptr;
+    BoxColliderComponent* mCollider = nullptr;
 
-	// Activation
-	bool mIsActive = false;
-	float mActivationInterval = 8.0f;
-	float mActivationDuration = 4.0f;
-	TimerScript mActivationIntervalTimer;
-	TimerScript mActivationDurationTimer;
-	
-	// Damage
-	float mDamageAmount = 5.0f;
-	float mSpeedReduction = 0.3f; // Reduce 70%
+    float mArea = 1.0f;
+    GameObject* mSfx = nullptr;
+
+    // Activation
+    bool mIsAwake = false;
+    bool mIsActive = false;
+
+    bool mFirstActivation = true;
+    float mFirstActivationInterval = 1.0f;
+
+    float mActivationInterval = 2.0f;
+    float mActivationDuration = 3.0f;
+
+    TimerScript mActivationIntervalTimer;
+    TimerScript mActivationDurationTimer;
+
+    // Damage
+    float mDamageAmount = 5.0f;
+    float mSpeedReduction = 0.5f;
+
+    float mDamageTimer = 0.0f;
+    float mDamageDelay = 1.0f;
+
+    PlayerController* mPlayer = nullptr;
+
+    SFX mTrapSound = SFX::ELECTRICAL_TRAP1;
 };
-

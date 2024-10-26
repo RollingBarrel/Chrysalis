@@ -73,6 +73,13 @@ public:
     void SetAnimation(std::string trigger, float transitionTime);
     void SetSpineAnimation(std::string trigger, float transitionTime);
     void SetAnimationSpeed(float speed);
+    void SetLowerAnimationSpeed(float speed);
+    void SetAnimationTime(float time);
+    void SetIsAnimationPlaying(bool state);
+    void RestartAnimationState();
+    void DashLookAtFront();
+    void DisableDashEffect();
+    std::string GetLowerAnimState() const;
 
     void MoveToPosition(float3 position);
     void MoveInDirection(float3 direction);
@@ -106,19 +113,20 @@ public:
 
     State* GetPlayerLowerState() const { return mLowerState; }
     State* GetPlayerUpperState() const { return mUpperState; }
-    void SetIdleState();
+    bool IsPlayerDashing() const;
 
     void SetSpecialWeapon(Weapon* weapon) { mSpecialWeapon = weapon; }
     void SetDashCoolDown(float value) { mDashCoolDown = value; }
     void SetDashDuration(float value) { mDashDuration = value; }
     void SetDashRange(float value) { mDashRange = value; }
     GameObject* GetDashVFX() const { return mDashVFX; }
+    GameObject* GetCharacterMesh() const { return mCharacterMesh; }
 
     // Grenade
     void SetGrenadeCooldown(float value) { mGrenadeCoolDown = value; }
     void SetGrenadeRange(float value) { mGrenadeRange = value; }
-    void SetGrenadeVisuals(bool value);
-    void UpdateGrenadeVisuals();
+    void EnableGrenadeAim(bool value);
+    void GrenadeAim();
     void ThrowGrenade();
 
     void CheckOtherTimers();
@@ -133,13 +141,16 @@ public:
 
     void RechargeBattery(EnergyType batteryType);
     void UseEnergy(int energy);
+    void ResetEnergy();
 
     void UnlockGrenade(bool unlock) { mGrenadeUnlocked = unlock; }
-    void UnlockUltimate(bool unlock) { mUltimateUnlocked = unlock; }
+    void UnlockUltimate(bool unlock) { mUltimateUnlocked = unlock;}
     bool IsGrenadeUnlocked() const { return mGrenadeUnlocked; }
     bool IsUltimateUnlocked() const { return mUltimateUnlocked; }
     //Hit Effect
     void ActivateHitEffect();
+
+    void AddKill();
     
     //Ultimate
     GameObject* GetUltimateGO() const{ return mUltimateGO; };
@@ -151,10 +162,10 @@ public:
     float GetUltimateChargeDuration() const { return mUltimateChargeDuration; }
     float GetUltimateDamageInterval() const { return mUltimateDamageInterval; };
     float GetUltimateDamageTick() const { return mUltimateDamageTick; };
-    void SetUltimateResource(int resource) { mUltimateResource = resource; }
+    void UseUltimateResource();
     void EnableUltimate(bool enable);
     void EnableChargeUltimate(bool enable);
-    void UltimateInterpolateLookAt(const float3& target); 
+    void InterpolateLookAt(const float3& target, float speed); 
 
     // States
     DashState* GetDashState() { return mDashState; }
@@ -168,11 +179,16 @@ public:
     ReloadState* GetReloadState() { return mReloadState; }
     UltimateState* GetUltimateState() { return mUltimateState; }
 
+    // Elevator
+    void SetIsInElevator(bool state) { mIsInElevator = state; }
+
 private:
+    void SetPlayerEmisive(const float3& emisiveColor);
     void CheckInput();
     void CheckHitEffect();
     void StateMachine();
     void HandleRotation();
+    void HandleLaser();
     void CheckDebugOptions();
     void OnCollisionEnter(CollisionData* collisionData);
 
@@ -213,7 +229,7 @@ private:
     float mDashRange = 5.0f;
 
     // Speed
-    float mPlayerSpeed;
+    float mPlayerSpeed = 1.0f;
     float mBaseSpeed = 5.5f;
 
     // Shield
@@ -227,7 +243,7 @@ private:
     Weapon* mSpecialWeapon = nullptr;
     int mCurrentEnergy = 100;
     EnergyType mEnergyType = EnergyType::NONE;
-    int mUltimateResource = 100;
+    int mUltimateResource = 0;
     float mDamageModifier = 1.0f;
 
     // RANGED
@@ -237,6 +253,8 @@ private:
     GameObject* mShootOrigin = nullptr;
     GameObject* mRedBaterryParticles = nullptr;
     GameObject* mBlueBaterryParticles = nullptr;
+    float mLaserLenght = 5.0f;
+    float mControllerAimSpeed = 15.0f;
 
     // MELEE
     MeleeWeapon* mBat = nullptr;
@@ -268,10 +286,13 @@ private:
     Grenade* mGrenade = nullptr;
     GameObject* mGrenadeGO = nullptr;
     GameObject* mGrenadeExplotionPreviewAreaGO = nullptr;
+    GameObject* mGrenadeThrowOrigin = nullptr;
+    TimerScript mGrenadeAimTimer;
 
     //Ultimate
     GameObject* mUltimateGO = nullptr;
     GameObject* mUltimateChargeGO = nullptr;
+    GameObject* mUltiOuterChargeGO = nullptr;
     float mUltimateCooldown = 1.0f;
     float mUltimateChargeDuration = 1.0f;
     float mUltimateDuration = 3.0f;
@@ -280,6 +301,8 @@ private:
     float mUltimateDamageInterval = 1.0f;
     float mUltimateAimSpeed = 1.0f;
     TimerScript UltimateRotationTimer;
+    int mUltSound = -1;
+    bool mInUlt = false;
     
     // Collider
     BoxColliderComponent* mCollider = nullptr;
@@ -297,20 +320,27 @@ private:
     bool mHit = false;
     std::vector<Component*> mMeshComponents;
     std::vector<unsigned int> mMaterialIds;
-    bool Delay(float delay);
 
     std::vector<float4> mPlayerOgColor;
  
     // DEBUFF
     bool mIsParalyzed = false;
-    const float mParalyzedDuration = 5.0f;
+    const float mParalyzedDuration = 0.5f;
     TimerScript mParalyzedTimerScript;
     float mParalysisSpeedReductionFactor = 1.0f;
 
     //Dash VFX
     GameObject* mDashVFX = nullptr;
+    GameObject* mCharacterMesh = nullptr;
 
     //UNLOCKED ABILITIES
     bool mGrenadeUnlocked = true;
     bool mUltimateUnlocked = true;
+
+    // Elevator
+    bool mIsInElevator = false;
+
+    int mKillCount = 0;
+
+
 };

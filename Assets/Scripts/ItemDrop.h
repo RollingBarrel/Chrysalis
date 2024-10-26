@@ -2,6 +2,7 @@
 #include "Script.h"
 #include "Macros.h"
 #include "GameObject.h"
+#include "TimerScript.h"
 
 GENERATE_BODY(ItemDrop);
 
@@ -22,6 +23,7 @@ public:
     void Start() override;
     void Update() override;
     void OnCollisionEnter(CollisionData* collisionData);
+    void CheckDistance();
 
 private:
     int mDropId = -1;
@@ -32,5 +34,9 @@ private:
     BoxColliderComponent* mCollider = nullptr;
 
     float mDespawnTimer = 0.0f;
-    
+
+    TimerScript mInteractTimer;
+    float mUIDeactivateTimer = 3.0f;
+
+    bool mCollided = false;
 };
